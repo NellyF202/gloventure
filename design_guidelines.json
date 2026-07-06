@@ -1,0 +1,120 @@
+{
+  "theme": "light",
+  "archetype": "1",
+  "archetype_name": "Organic & Earthy",
+  "colors": {
+    "background": "#FAF3EC",
+    "background_alt": "#F8EFE6",
+    "primary": "#1F5C3A",
+    "primary_hover": "#16452B",
+    "accent": "#C5953E",
+    "card_problem_bg": "#F4DCD4",
+    "icon_tint_coral": "#C44D2E",
+    "card_solution_bg": "#FFFFFF",
+    "text_primary": "#1A2E22",
+    "text_secondary": "#3E5748",
+    "text_tertiary": "#6C8776"
+  },
+  "typography": {
+    "headings": {
+      "font_family": "Playfair Display",
+      "weights": ["400", "500", "600", "700"],
+      "styles": ["normal", "italic"],
+      "usage": "Use high-contrast Playfair Display. Accent words (like 'Every time.' or 'Delivered') should be set in italic and green (#1F5C3A)."
+    },
+    "body": {
+      "font_family": "Manrope",
+      "weights": ["400", "500", "600"],
+      "usage": "Clean readable sans-serif for body text, forms, and smaller labels."
+    }
+  },
+  "layout_spacing": {
+    "container_padding": "px-6 md:px-12 lg:px-24 py-16 lg:py-24",
+    "section_gap": "gap-16 lg:gap-32",
+    "card_padding": "p-8",
+    "border_radius": {
+      "button": "rounded-full",
+      "card": "rounded-2xl",
+      "badge": "rounded-full"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#1F5C3A] text-white rounded-full hover:bg-[#16452B] transition-colors px-8 py-3.5 font-medium",
+      "secondary": "border-2 border-[#1F5C3A] text-[#1F5C3A] bg-transparent rounded-full hover:bg-[#1F5C3A]/5 transition-colors px-8 py-3.5 font-medium"
+    },
+    "cards": {
+      "problem": "bg-[#F4DCD4] rounded-2xl p-8 shadow-sm flex flex-col gap-4",
+      "solution": "bg-white rounded-2xl p-8 shadow-sm border border-[#1F5C3A]/10 flex flex-col gap-4"
+    },
+    "badges": {
+      "primary": "inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-[#1F5C3A]/10 rounded-full px-4 py-2 text-sm font-medium text-[#1F5C3A] shadow-sm"
+    }
+  },
+  "image_urls": {
+    "hero": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/5ae037a9-9343-43c8-a202-30c3ae3a5420/images/c72b442d816423b7396624cd1dcf91a1b9a1c34743f13f0a45fc029ec29dff6d.png",
+      "description": "Premium burlap sack of rice on a rustic table with a Malawian family in the background."
+    },
+    "delivery": {
+      "url": "https://static.prod-images.emergentagent.com/jobs/5ae037a9-9343-43c8-a202-30c3ae3a5420/images/5cbed1cdebd06e2c64e3d06a4d7811ff324ed41c40ab7a13864b226e97007956.png",
+      "description": "Cheerful Malawian motorbike delivery driver delivering premium rice."
+    },
+    "community": {
+      "url": "https://images.unsplash.com/photo-1768814667300-8c9e2007b949?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NjZ8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwY29tbXVuaXR5JTIwd29tZW58ZW58MHx8fHwxNzc3NzI0OTI4fDA&ixlib=rb-4.1.0&q=85",
+      "description": "African community women."
+    },
+    "products": {
+      "url": "https://images.unsplash.com/photo-1709236550338-e2bcc3beee70?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjd8MHwxfHNlYXJjaHwyfHxyaWNlJTIwYmFncyUyMG1hcmtldHxlbnwwfHx8fDE3Nzc3MjQ5Mjh8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Bags of food in the market."
+    }
+  },
+  "pages": {
+    "marketing": {
+      "sections": [
+        "Header Navigation (Sticky)",
+        "Hero Section",
+        "Problem Section (5 Cards)",
+        "Solution Section (Split Layout)",
+        "Mission Section (Girls Education)",
+        "How It Works (4 Steps)",
+        "Product Catalog (3 Sizes)",
+        "Impact & Testimonials",
+        "Team Section",
+        "Footer"
+      ]
+    },
+    "ecommerce": {
+      "flows": [
+        "Product Selection",
+        "Checkout Form (Name, Phone, Location, Notes)",
+        "WhatsApp Redirect (Pre-filled msg to +265886750499)",
+        "Order Success Page"
+      ]
+    },
+    "admin": {
+      "sections": [
+        "Admin Login",
+        "Dashboard (Orders Table)",
+        "Product Management"
+      ]
+    }
+  },
+  "testing": {
+    "attributes": [
+      "All interactive elements MUST include data-testid='role-based-name'"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "IMPORTANT: Do not use placeholders for images. Use the provided image URLs.",
+    "Use Playfair Display for all headings. For accent words (like 'Every time.' in the solution section or 'Delivered' in the hero), use italic and primary green color.",
+    "Set the overall page background to #FAF3EC (warm cream).",
+    "For the Problem section cards, strictly use the dusty terracotta color #F4DCD4 with icon tint #C44D2E inside light square tiles.",
+    "For the Solution section, use a split layout with a checklist on the left and 4 white cards on the right.",
+    "Implement the 'Order Now' flow: users select products and fill a form, which saves to DB and redirects to WhatsApp via api/whatsapp.",
+    "Ensure the hero section features a badge 'Every bag helps keep girls in school' with an ochre icon #C5953E.",
+    "Buttons must be pill-shaped. Cards should be soft-rounded (rounded-2xl) with subtle shadows.",
+    "Use Manrope for body font and forms.",
+    "Ensure accessibility: maintain high contrast ratios for all text."
+  ]
+}
