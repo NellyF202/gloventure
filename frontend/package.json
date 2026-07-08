@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8000",
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",
@@ -60,6 +61,9 @@
     "build": "craco build",
     "test": "craco test"
   },
+  "resolutions": {
+    "lodash": "4.17.21"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -84,6 +88,7 @@
     "eslint-plugin-react": "7.37.4",
     "eslint-plugin-react-hooks": "5.2.0",
     "globals": "15.15.0",
+    "http-proxy-middleware": "2.0.9",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17"
   },

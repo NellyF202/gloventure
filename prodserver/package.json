@@ -1,0 +1,10 @@
+{
+  "name": "glo-venture-prodserver",
+  "version": "1.0.0",
+  "private": true,
+  "main": "server.js",
+  "dependencies": {
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5"
+  }
+}

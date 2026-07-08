@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Lock, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import api, { setToken, getToken } from "../lib/api";
+import logo from "../assets/logo.png";
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ export default function AdminLogin() {
 
       <div className="flex-1 flex items-center justify-center px-5 py-16">
         <form onSubmit={submit} className="w-full max-w-md card-solution" data-testid="admin-login-form">
-          <div className="icon-tile icon-tile-green"><Lock size={20} /></div>
+          <img src={logo} alt="GLO Venture" className="h-12 w-auto mb-2" />
           <h1 className="font-display text-3xl" style={{ color: "var(--glo-text)" }}>Admin <span className="italic-green">login</span></h1>
           <p className="text-sm" style={{ color: "var(--glo-text-2)" }}>Sign in to manage GLO Venture orders.</p>
 

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, PackageSearch } from "lucide-react";
 import { useState } from "react";
+import logo from "../assets/logo.png";
 
 export const Navbar = () => {
   const nav = useNavigate();
@@ -24,15 +25,7 @@ export const Navbar = () => {
     >
       <div className="container-glo flex items-center justify-between py-4">
         <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-display text-lg"
-            style={{ background: "var(--glo-green)" }}
-          >
-            G
-          </div>
-          <span className="font-display text-xl tracking-tight" style={{ color: "var(--glo-text)" }}>
-            GLO <span className="italic-green">Venture</span>
-          </span>
+          <img src={logo} alt="GLO Venture" className="h-10 w-auto" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-8">
@@ -42,7 +35,10 @@ export const Navbar = () => {
           <button onClick={() => scrollTo("contact")} className="nav-link" data-testid="nav-contact">Contact</button>
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-3">
+          <Link to="/track" className="btn-secondary" data-testid="nav-track-order">
+            <PackageSearch size={18} /> Track Order
+          </Link>
           <Link to="/order" className="btn-primary" data-testid="nav-order-now">
             <ShoppingBag size={18} /> Order Now
           </Link>
@@ -65,6 +61,9 @@ export const Navbar = () => {
             <button onClick={() => scrollTo("how")} className="text-left nav-link">How It Works</button>
             <button onClick={() => scrollTo("impact")} className="text-left nav-link">Impact</button>
             <button onClick={() => scrollTo("contact")} className="text-left nav-link">Contact</button>
+            <Link to="/track" onClick={() => setOpen(false)} className="btn-secondary justify-center">
+              <PackageSearch size={18} /> Track Order
+            </Link>
             <Link to="/order" onClick={() => setOpen(false)} className="btn-primary justify-center">
               <ShoppingBag size={18} /> Order Now
             </Link>

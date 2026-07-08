@@ -79,24 +79,66 @@ const STATS = [
   { value: "50,000+", label: "People in Dowa & Dzaleka served daily" },
 ];
 
+import teamJospin from "../assets/team-jospin.jpg";
+import teamNelly from "../assets/team-nelly.jpg";
+import teamJoseph from "../assets/team-joseph.jpg";
+
 const TEAM = [
-  {
-    name: "Nelly Furaha Kininga",
-    role: "Founder & CEO",
-    bio: "Community-rooted leader, operations & strategy expert.",
-    initials: "NF",
-  },
   {
     name: "Jospin Amissi Hassan",
     role: "Logistics Manager",
     bio: "Keeps every delivery fast, reliable, and on time.",
-    initials: "JA",
+    photo: teamJospin,
+  },
+  {
+    name: "Nelly Furaha Kininga",
+    role: "Founder & CEO",
+    bio: "Community-rooted leader, operations & strategy expert.",
+    photo: teamNelly,
   },
   {
     name: "Joseph Abednego Shabani",
     role: "Sales Lead",
     bio: "Business relationships & bulk buyer management.",
-    initials: "JS",
+    photo: teamJoseph,
+  },
+];
+const TESTIMONIALS = [
+  {
+    name: "Grace Banda",
+    location: "Dowa Town",
+    stars: 5,
+    quote: "Before GLO Venture I used to walk 2 hours to the market every week. Now the rice comes to my door and it is always clean — no stones at all!",
+  },
+  {
+    name: "Aisha Tembo",
+    location: "Dzaleka Camp",
+    stars: 5,
+    quote: "I ordered 10 kg bags for my family. The delivery was fast and the rice was exactly as weighed. I trust GLO Venture completely.",
+  },
+  {
+    name: "Chisomo Phiri",
+    location: "Dowa District",
+    stars: 5,
+    quote: "The price is fair and the service is professional. I got a WhatsApp message when my order was on the way. Very impressed!",
+  },
+  {
+    name: "Fatuma Rashidi",
+    location: "Dzaleka Camp",
+    stars: 5,
+    quote: "As a mother of six, carrying heavy rice bags from town was so hard. GLO Venture brings it right to me. My children are happy and I save so much time.",
+  },
+  {
+    name: "Emmanuel Chikwanda",
+    location: "Dowa Town",
+    stars: 4,
+    quote: "Good quality rice. The rider was polite and on time. I will keep ordering every month.",
+  },
+  {
+    name: "Mary Nkhata",
+    location: "Dzaleka Camp",
+    stars: 5,
+    quote: "I told all my neighbors about GLO Venture. We now do a group order every two weeks. The bulk discount is wonderful!",
   },
 ];
 
@@ -439,14 +481,14 @@ export default function Landing() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {TEAM.map((m) => (
-              <div key={m.name} className="card-solution items-start" data-testid={`team-${m.initials}`}>
-                <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center font-display text-2xl"
-                  style={{ background: "var(--glo-green-soft)", color: "var(--glo-green)" }}
-                >
-                  {m.initials}
-                </div>
-                <h3 className="font-display text-2xl mt-2" style={{ color: "var(--glo-text)" }}>{m.name}</h3>
+              <div key={m.name} className="card-solution items-start" data-testid={`team-${m.name}`}>
+                <img
+                  src={m.photo}
+                  alt={m.name}
+                  className="w-20 h-20 rounded-full object-cover object-top"
+                  style={{ border: "3px solid var(--glo-green-soft)" }}
+                />
+                <h3 className="font-display text-2xl mt-3" style={{ color: "var(--glo-text)" }}>{m.name}</h3>
                 <p className="text-sm font-semibold" style={{ color: "var(--glo-ochre)" }}>{m.role}</p>
                 <p className="text-sm" style={{ color: "var(--glo-text-2)" }}>{m.bio}</p>
               </div>
@@ -455,6 +497,46 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
+      <section className="section" style={{ background: "var(--glo-cream-2)" }} data-testid="testimonials-section">
+        <div className="container-glo">
+          <div className="max-w-2xl mb-12">
+            <p className="eyebrow mb-4">Customer Reviews</p>
+            <h2 className="font-display text-4xl sm:text-5xl leading-[1.05]" style={{ color: "var(--glo-text)" }}>
+              What our <span className="italic-green">customers say.</span>
+            </h2>
+            <p className="mt-4" style={{ color: "var(--glo-text-2)" }}>
+              Real feedback from families in Dowa and Dzaleka who receive GLO Venture rice at their doorstep.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="card-solution flex flex-col gap-3" data-testid={`testimonial-${i}`}>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <svg key={s} width="16" height="16" viewBox="0 0 20 20" fill={s < t.stars ? "var(--glo-ochre)" : "none"} stroke="var(--glo-ochre)" strokeWidth="1.5">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--glo-text-2)" }}>"{t.quote}"</p>
+                <div className="flex items-center gap-3 mt-2">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                    style={{ background: "var(--glo-green-soft)", color: "var(--glo-green)" }}
+                  >
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: "var(--glo-text)" }}>{t.name}</p>
+                    <p className="text-xs" style={{ color: "var(--glo-text-3)" }}>{t.location}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
       {/* FINAL CTA */}
       <section className="section" style={{ background: "var(--glo-cream-2)" }}>
         <div className="container-glo">

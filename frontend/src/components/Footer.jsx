@@ -1,5 +1,6 @@
 import { Mail, Phone, Linkedin, MessageCircle, MapPin } from "lucide-react";
 import { buildWhatsappLink } from "../lib/api";
+import logo from "../assets/logo.png";
 
 export const Footer = () => {
   return (
@@ -13,15 +14,7 @@ export const Footer = () => {
         <div className="grid md:grid-cols-3 gap-12">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-display text-lg"
-                style={{ background: "var(--glo-ochre)" }}
-              >
-                G
-              </div>
-              <span className="font-display text-2xl">
-                GLO <span style={{ color: "var(--glo-ochre)", fontStyle: "italic" }}>Venture</span>
-              </span>
+              <img src={logo} alt="GLO Venture" className="h-10 w-auto rounded-md" />
             </div>
             <p className="text-sm leading-relaxed" style={{ color: "rgba(250,243,236,0.8)" }}>
               Premium Malawian rice, delivered honestly. Every bag helps keep girls in school.
