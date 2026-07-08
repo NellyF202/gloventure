@@ -390,6 +390,7 @@ export default function Landing() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {products.map((p, i) => (
+              {(Array.isArray(products) ? products : []).map((p, i) => (
               <div
                 key={p.id}
                 className="card-solution relative"
