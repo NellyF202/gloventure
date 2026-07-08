@@ -11,11 +11,15 @@ from typing import List, Optional
 
 import bcrypt
 import jwt
+import io
+import csv
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import StreamingResponse
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
+from openpyxl import Workbook
 
 # ---------------- Mongo ----------------
 mongo_url = os.environ['MONGO_URL']
@@ -112,34 +116,56 @@ class AdminLogin(BaseModel):
 class OrderStatusUpdate(BaseModel):
     status: str  # pending | confirmed | out_for_delivery | delivered | cancelled
 
-# ---------------- Hardcoded Catalogue ----------------
-PRODUCTS: List[Product] = [
-    Product(
-        id="rice-5kg",
-        name="GLO Premium Rice — Family Pack",
-        size_kg=5,
-        price_mwk=8500,
-        description="Cleaned, stone-free, honestly milled Malawian rice. Perfect for small households.",
-        badge="Most popular",
-    ),
-    Product(
-        id="rice-25kg",
-        name="GLO Premium Rice — Household Bag",
-        size_kg=25,
-        price_mwk=38000,
-        description="Branded 25kg bag of premium Malawian rice. Honest weight, full trust.",
-        badge="Best value",
-    ),
-    Product(
-        id="rice-50kg",
-        name="GLO Premium Rice — Bulk Bag",
-        size_kg=50,
-        price_mwk=72000,
-        description="Bulk 50kg bag for restaurants, chippy stands, mini-marts and large families.",
-        badge="Bulk",
-    ),
+class ProductCreate(BaseModel):
+    name: str = Field(min_length=2)
+    size_kg: int = Field(gt=0)
+    price_mwk: int = Field(gt=0)
+    description: str = ""
+    badge: Optional[str] = None
+    image: Optional[str] = None
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = None
+    size_kg: Optional[int] = None
+    price_mwk: Optional[int] = None
+    description: Optional[str] = None
+    badge: Optional[str] = None
+    image: Optional[str] = None
+
+class TrackQuery(BaseModel):
+    phone: Optional[str] = None
+    order_id: Optional[str] = None
+
+# ---------------- Default Catalogue (seeded into DB on first run) ----------------
+DEFAULT_PRODUCTS = [
+    {
+        "id": "rice-5kg",
+        "name": "GLO Premium Rice — Family Pack",
+        "size_kg": 5,
+        "price_mwk": 8500,
+        "description": "Cleaned, stone-free, honestly milled Malawian rice. Perfect for small households.",
+        "badge": "Most popular",
+        "image": None,
+    },
+    {
+        "id": "rice-25kg",
+        "name": "GLO Premium Rice — Household Bag",
+        "size_kg": 25,
+        "price_mwk": 38000,
+        "description": "Branded 25kg bag of premium Malawian rice. Honest weight, full trust.",
+        "badge": "Best value",
+        "image": None,
+    },
+    {
+        "id": "rice-50kg",
+        "name": "GLO Premium Rice — Bulk Bag",
+        "size_kg": 50,
+        "price_mwk": 72000,
+        "description": "Bulk 50kg bag for restaurants, chippy stands, mini-marts and large families.",
+        "badge": "Bulk",
+        "image": None,
+    },
 ]
-PRODUCT_MAP = {p.id: p for p in PRODUCTS}
 
 # ---------------- App ----------------
 app = FastAPI(title="GLO Venture API")
@@ -151,16 +177,70 @@ async def root():
 
 @api.get("/products", response_model=List[Product])
 async def list_products():
-    return PRODUCTS
+    cursor = db.products.find({}, {"_id": 0}).sort("price_mwk", 1)
+    return await cursor.to_list(200)
+
+@api.get("/track", response_model=List[OrderResponse])
+async def track_order(phone: Optional[str] = None, order_id: Optional[str] = None):
+    if not phone and not order_id:
+        raise HTTPException(status_code=400, detail="Provide a phone number or order ID")
+    query = {}
+    if order_id:
+        oid = order_id.strip()
+        query = {"id": {"$regex": f"^{oid}", "$options": "i"}}
+    elif phone:
+        query = {"phone": phone.strip()}
+    cursor = db.orders.find(query, {"_id": 0}).sort("created_at", -1)
+    results = await cursor.to_list(50)
+    if not results:
+        raise HTTPException(status_code=404, detail="No orders found for this phone number or order ID")
+    return results
+
+@api.post("/admin/products", response_model=Product)
+async def create_product(payload: ProductCreate, _: dict = Depends(get_current_admin)):
+    doc = {
+        "id": str(uuid.uuid4()),
+        "name": payload.name.strip(),
+        "size_kg": payload.size_kg,
+        "price_mwk": payload.price_mwk,
+        "description": payload.description.strip(),
+        "badge": payload.badge,
+        "image": payload.image,
+    }
+    await db.products.insert_one(doc.copy())
+    return Product(**doc)
+
+@api.put("/admin/products/{product_id}", response_model=Product)
+async def update_product(product_id: str, payload: ProductUpdate, _: dict = Depends(get_current_admin)):
+    updates = {k: v for k, v in payload.dict(exclude_unset=True).items() if v is not None}
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    res = await db.products.find_one_and_update(
+        {"id": product_id},
+        {"$set": updates},
+        return_document=True,
+        projection={"_id": 0},
+    )
+    if not res:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return Product(**res)
+
+@api.delete("/admin/products/{product_id}")
+async def delete_product(product_id: str, _: dict = Depends(get_current_admin)):
+    res = await db.products.delete_one({"id": product_id})
+    if res.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return {"ok": True}
 
 @api.post("/orders", response_model=OrderResponse)
 async def create_order(payload: OrderCreate):
     enriched_items = []
     total = 0
     for item in payload.items:
-        prod = PRODUCT_MAP.get(item.product_id)
-        if not prod:
+        prod_doc = await db.products.find_one({"id": item.product_id}, {"_id": 0})
+        if not prod_doc:
             raise HTTPException(status_code=400, detail=f"Unknown product {item.product_id}")
+        prod = Product(**prod_doc)
         line_total = prod.price_mwk * item.quantity
         total += line_total
         enriched_items.append({
@@ -242,6 +322,71 @@ async def admin_stats(_: dict = Depends(get_current_admin)):
         rev = d.get("rev", 0)
     return {"total_orders": total, "pending": pending, "delivered": delivered, "revenue_mwk": rev}
 
+ORDER_REPORT_HEADERS = [
+    "Order ID", "Customer Name", "Phone", "Location", "Address", "Items",
+    "Total (MWK)", "Status", "Notes", "Created At",
+]
+
+def _order_row(o: dict) -> list:
+    items_str = "; ".join(
+        f"{it.get('quantity')} x {it.get('size_kg')}kg {it.get('name')}" for it in o.get("items", [])
+    )
+    return [
+        o.get("id", ""),
+        o.get("customer_name", ""),
+        o.get("phone", ""),
+        o.get("location", ""),
+        o.get("address_details", ""),
+        items_str,
+        o.get("total_mwk", 0),
+        o.get("status", ""),
+        o.get("notes", ""),
+        o.get("created_at", ""),
+    ]
+
+@api.get("/admin/orders/export")
+async def export_orders(format: str = "csv", _: dict = Depends(get_current_admin)):
+    fmt = (format or "csv").lower()
+    if fmt not in {"csv", "xlsx"}:
+        raise HTTPException(status_code=400, detail="format must be 'csv' or 'xlsx'")
+
+    cursor = db.orders.find({}, {"_id": 0}).sort("created_at", -1)
+    orders = await cursor.to_list(5000)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+
+    if fmt == "csv":
+        buf = io.StringIO()
+        writer = csv.writer(buf)
+        writer.writerow(ORDER_REPORT_HEADERS)
+        for o in orders:
+            writer.writerow(_order_row(o))
+        buf.seek(0)
+        filename = f"glo_venture_orders_{timestamp}.csv"
+        return StreamingResponse(
+            iter([buf.getvalue()]),
+            media_type="text/csv",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Orders"
+    ws.append(ORDER_REPORT_HEADERS)
+    for o in orders:
+        ws.append(_order_row(o))
+    for col in ws.columns:
+        max_len = max((len(str(c.value)) if c.value is not None else 0) for c in col)
+        ws.column_dimensions[col[0].column_letter].width = min(max_len + 2, 50)
+    out = io.BytesIO()
+    wb.save(out)
+    out.seek(0)
+    filename = f"glo_venture_orders_{timestamp}.xlsx"
+    return StreamingResponse(
+        out,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
 app.include_router(api)
 
 app.add_middleware(
@@ -277,8 +422,15 @@ async def startup():
     try:
         await db.users.create_index("email", unique=True)
         await db.orders.create_index("created_at")
+        await db.products.create_index("id", unique=True)
     except Exception as e:
         logger.warning(f"Index create skipped: {e}")
+
+    # Seed products catalogue if empty
+    product_count = await db.products.count_documents({})
+    if product_count == 0:
+        await db.products.insert_many([p.copy() for p in DEFAULT_PRODUCTS])
+        logger.info(f"Seeded {len(DEFAULT_PRODUCTS)} default products")
 
 @app.on_event("shutdown")
 async def shutdown():
