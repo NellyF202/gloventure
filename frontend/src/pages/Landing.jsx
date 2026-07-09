@@ -146,7 +146,9 @@ export default function Landing() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    api.get("/products").then((r) => setProducts(r.data)).catch(() => {});
+    api.get("/products")
+      .then((r) => setProducts(Array.isArray(r.data) ? r.data : []))
+      .catch(() => setProducts([]));
     if (window.location.hash) {
       const id = window.location.hash.replace("#", "");
       setTimeout(() => {
@@ -389,8 +391,7 @@ export default function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {products.map((p, i) => (
-              {(Array.isArray(products) ? products : []).map((p, i) => (
+            {(Array.isArray(products) ? products : []).map((p, i) => (
               <div
                 key={p.id}
                 className="card-solution relative"
